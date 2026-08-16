@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario — Proyecto 2 ITI-522</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="logo">INVENT<span>ARIO</span></a>
+      <div class="search-bar">
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" placeholder="Buscar por nombre o ubicación...">
+      </div>
+    </div>
+  </header>
+
+  <section class="intro">
+    <p class="eyebrow">Grupo 02 · Proyecto 2 · ITI-522</p>
+    <h1>Sistema de <span>Inventario</span></h1>
+    <p class="intro-sub">Registrá, consultá y actualizá artículos directamente contra la base de datos de la VM.</p>
+  </section>
+
+  <main>
+    <!-- ============ FORMULARIO: registrar / editar ============ -->
+    <section class="section">
+      <p class="section-eyebrow" id="formEyebrow">Nuevo registro</p>
+      <h2 id="formTitle">Registrar artículo</h2>
+
+      <form class="form-card" id="articuloForm">
+        <input type="hidden" id="articuloId" value="">
+        <label>Nombre
+          <input type="text" id="nombre" maxlength="150" required placeholder="Ej: Router Cisco RV340">
+        </label>
+
+        <div class="form-row">
+          <label>Cantidad
+            <input type="number" id="cantidad" min="0" step="1" required placeholder="0">
+          </label>
+          <label>Estado
+            <select id="estado">
+              <option value="disponible">Disponible</option>
+              <option value="reservado">Reservado</option>
+              <option value="agotado">Agotado</option>
+              <option value="en_transito">En tránsito</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Ubicación
+          <input type="text" id="ubicacion" maxlength="100" required placeholder="Ej: Bodega A / Camión 3">
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <i class="bi bi-plus-circle"></i> Registrar
+          </button>
+          <button type="button" class="btn btn-ghost" id="cancelEditBtn" style="display:none;">
+            Cancelar edición
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ LISTA DE ARTÍCULOS ============ -->
+    <section class="section" style="border-bottom:none;">
+      <div class="articulos-head">
+        <div>
+          <p class="section-eyebrow">Inventario actual</p>
+          <h2>Artículos</h2>
+        </div>
+        <div class="count-pill" id="countPill">0 artículos</div>
+      </div>
+
+      <div class="articulos-grid" id="articulosGrid">
+        <!-- Se llena dinámicamente desde app.js -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Proyecto 2 · ITI-522 · Computación en la Nube · Grupo 02
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
