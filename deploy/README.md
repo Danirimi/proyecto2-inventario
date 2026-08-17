@@ -57,6 +57,12 @@ Se probó que ambos sitios responden correctamente en paralelo:
 `/`, `/inventario/`, `/inventario/css/style.css` y `/api/health` /
 `/api/articulos` devuelven 200 con el contenido esperado.
 
+**Nota (fuera del alcance de Proyecto 2, cambio pedido por el grupo):**
+`/` ahora sirve directo `tienda.html` (la tienda de Proyecto 1), en
+vez de la landing `proyecto1.html` con el botón hacia la tienda.
+`proyecto1.html` sigue accesible directamente en esa ruta, solo dejó
+de ser la página de entrada por defecto.
+
 ## 3. Acceso por IP pública y desde móvil (pendiente de confirmar en equipo)
 
 - IP pública de la VM: `52.162.223.117`
