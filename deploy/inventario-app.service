@@ -1,0 +1,21 @@
+[Unit]
+Description=Inventario App (Proyecto 2 - Node/Express)
+After=network.target mariadb.service
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=UTNti
+WorkingDirectory=/home/UTNti/proyecto2-inventario/app
+ExecStart=/home/UTNti/.local/bin/node src/server.js
+EnvironmentFile=/home/UTNti/proyecto2-inventario/app/.env
+Restart=on-failure
+RestartSec=5
+
+# Endurecimiento básico del servicio
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
