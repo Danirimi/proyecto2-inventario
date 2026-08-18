@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup de inventario_db hacia Azure Blob Storage (Fase 4/6)
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=UTNti
+WorkingDirectory=/home/UTNti/proyecto2-inventario/backup
+ExecStart=/home/UTNti/proyecto2-inventario/backup/backup_db.sh

@@ -1,0 +1,10 @@
+[Unit]
+Description=Disparador diario (2:00 AM) del backup de inventario_db, con catch-up si la VM estuvo apagada
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target
