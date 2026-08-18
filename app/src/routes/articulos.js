@@ -4,9 +4,15 @@ const pool = require('../db');
 
 const ESTADOS_VALIDOS = ['disponible', 'reservado', 'agotado', 'en_transito'];
 
+// Un artículo con categoria asignada se muestra como producto en la
+// tienda (Proyecto 1) — ver GET /?catalogo=1 más abajo. Todos estos
+// campos son opcionales: un artículo puramente operativo (sin
+// categoria) simplemente no aparece ahí, solo en /inventario/.
+const CAMPOS_CATALOGO = ['precio', 'precio_anterior', 'categoria', 'especificaciones', 'icono', 'imagen_base'];
+
 function validarArticulo(body, { parcial = false } = {}) {
   const errores = [];
-  const { nombre, cantidad, ubicacion, estado } = body;
+  const { nombre, cantidad, ubicacion, estado, precio, precio_anterior, categoria, especificaciones, icono, imagen_base } = body;
 
   if (!parcial || nombre !== undefined) {
     if (!nombre || typeof nombre !== 'string' || !nombre.trim()) {
@@ -34,19 +40,50 @@ function validarArticulo(body, { parcial = false } = {}) {
     errores.push(`estado debe ser uno de: ${ESTADOS_VALIDOS.join(', ')}`);
   }
 
+  for (const campo of ['precio', 'precio_anterior']) {
+    const valor = body[campo];
+    if (valor !== undefined && valor !== null && (typeof valor !== 'number' || valor < 0)) {
+      errores.push(`${campo} debe ser un número >= 0`);
+    }
+  }
+
+  if (categoria !== undefined && categoria !== null && (typeof categoria !== 'string' || categoria.length > 30)) {
+    errores.push('categoria debe ser texto de máximo 30 caracteres');
+  }
+  if (especificaciones !== undefined && especificaciones !== null && (typeof especificaciones !== 'string' || especificaciones.length > 150)) {
+    errores.push('especificaciones debe ser texto de máximo 150 caracteres');
+  }
+  if (icono !== undefined && icono !== null && (typeof icono !== 'string' || icono.length > 30)) {
+    errores.push('icono debe ser texto de máximo 30 caracteres');
+  }
+  if (imagen_base !== undefined && imagen_base !== null && (typeof imagen_base !== 'string' || imagen_base.length > 255)) {
+    errores.push('imagen_base debe ser texto de máximo 255 caracteres');
+  }
+
   return errores;
 }
 
-// GET /api/articulos — consultar todos (con búsqueda opcional ?q=)
+// GET /api/articulos — consultar todos (con búsqueda opcional ?q= y,
+// para la tienda (Proyecto 1), ?catalogo=1 que filtra solo los
+// artículos con categoria asignada, ocultando cantidad/ubicacion
+// operativos de cara al público)
 router.get('/', async (req, res) => {
   try {
-    const { q } = req.query;
-    let sql = 'SELECT * FROM articulos';
+    const { q, catalogo } = req.query;
+    const condiciones = [];
     const params = [];
 
+    if (catalogo) {
+      condiciones.push('categoria IS NOT NULL');
+    }
     if (q) {
-      sql += ' WHERE nombre LIKE ? OR ubicacion LIKE ?';
+      condiciones.push('(nombre LIKE ? OR ubicacion LIKE ?)');
       params.push(`%${q}%`, `%${q}%`);
+    }
+
+    let sql = 'SELECT * FROM articulos';
+    if (condiciones.length > 0) {
+      sql += ' WHERE ' + condiciones.join(' AND ');
     }
     sql += ' ORDER BY updated_at DESC';
 
@@ -80,10 +117,15 @@ router.post('/', async (req, res) => {
   }
 
   const { nombre, cantidad, ubicacion, estado } = req.body;
+  const valoresCatalogo = CAMPOS_CATALOGO.map((campo) => {
+    const v = req.body[campo];
+    return typeof v === 'string' ? v.trim() : (v ?? null);
+  });
   try {
     const [result] = await pool.query(
-      'INSERT INTO articulos (nombre, cantidad, ubicacion, estado) VALUES (?, ?, ?, ?)',
-      [nombre.trim(), cantidad, ubicacion.trim(), estado || 'disponible']
+      `INSERT INTO articulos (nombre, cantidad, ubicacion, estado, ${CAMPOS_CATALOGO.join(', ')})
+       VALUES (?, ?, ?, ?, ${CAMPOS_CATALOGO.map(() => '?').join(', ')})`,
+      [nombre.trim(), cantidad, ubicacion.trim(), estado || 'disponible', ...valoresCatalogo]
     );
     const [rows] = await pool.query('SELECT * FROM articulos WHERE id = ?', [result.insertId]);
     res.status(201).json(rows[0]);
@@ -102,7 +144,7 @@ router.put('/:id', async (req, res) => {
 
   const campos = [];
   const valores = [];
-  for (const campo of ['nombre', 'cantidad', 'ubicacion', 'estado']) {
+  for (const campo of ['nombre', 'cantidad', 'ubicacion', 'estado', ...CAMPOS_CATALOGO]) {
     if (req.body[campo] !== undefined) {
       campos.push(`${campo} = ?`);
       valores.push(typeof req.body[campo] === 'string' ? req.body[campo].trim() : req.body[campo]);
