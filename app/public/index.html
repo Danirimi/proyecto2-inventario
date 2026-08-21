@@ -59,6 +59,51 @@
           <input type="text" id="ubicacion" maxlength="100" required placeholder="Ej: Bodega A / Camión 3">
         </label>
 
+        <label>Link de imagen (opcional)
+          <input type="url" id="imagenUrl" maxlength="500" placeholder="https://ejemplo.com/foto.jpg">
+        </label>
+        <div class="img-preview" id="imgPreview" style="display:none;">
+          <img id="imgPreviewImg" alt="Previsualización de la imagen">
+          <span id="imgPreviewError" class="img-preview-error" style="display:none;">
+            <i class="bi bi-exclamation-triangle"></i> No se pudo cargar la imagen desde ese link
+          </span>
+        </div>
+
+        <p class="catalogo-hint">
+          <i class="bi bi-shop"></i> Los siguientes campos son opcionales — solo se llenan
+          si este artículo también debe verse como producto en la tienda (Zytrax).
+          Sin categoría, el artículo se queda solo en el inventario interno.
+        </p>
+
+        <div class="catalogo-fields" id="catalogoFields">
+          <div class="form-row">
+            <label>Categoría
+              <select id="categoria">
+                <option value="">— Solo inventario (no se muestra en tienda) —</option>
+                <option value="laptops">Laptops</option>
+                <option value="armadas">PCs Armadas</option>
+                <option value="componentes">Componentes</option>
+                <option value="perifericos">Periféricos</option>
+                <option value="monitores">Monitores</option>
+              </select>
+            </label>
+            <label>Precio (₡)
+              <input type="number" id="precio" min="0" step="1" placeholder="Ej: 589000">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Precio anterior (opcional, para oferta)
+              <input type="number" id="precioAnterior" min="0" step="1" placeholder="Ej: 659000">
+            </label>
+            <label>Ícono (Bootstrap Icons, opcional)
+              <input type="text" id="icono" maxlength="30" placeholder="Ej: bi-laptop">
+            </label>
+          </div>
+          <label>Especificaciones (opcional)
+            <input type="text" id="especificaciones" maxlength="150" placeholder="Ej: Intel Core i5 · 16GB · 512GB SSD">
+          </label>
+        </div>
+
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" id="submitBtn">
             <i class="bi bi-plus-circle"></i> Registrar

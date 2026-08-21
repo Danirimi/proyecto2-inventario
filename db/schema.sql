@@ -27,6 +27,12 @@ CREATE TABLE IF NOT EXISTS articulos (
     especificaciones VARCHAR(150) NULL,
     icono VARCHAR(30) NULL,
     imagen_base VARCHAR(255) NULL,
+    -- Link completo a una imagen ya alojada en otro lugar (ej. subida a
+    -- un hosting/CDN externo). A diferencia de imagen_base (nombre base
+    -- local sin extensión, para archivos servidos por esta misma VM),
+    -- imagen_url se usa tal cual como src de la imagen. Si ambos están
+    -- presentes, imagen_url tiene prioridad (ver tienda.js).
+    imagen_url VARCHAR(500) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -41,6 +47,7 @@ ALTER TABLE articulos ADD COLUMN IF NOT EXISTS categoria VARCHAR(30) NULL AFTER 
 ALTER TABLE articulos ADD COLUMN IF NOT EXISTS especificaciones VARCHAR(150) NULL AFTER categoria;
 ALTER TABLE articulos ADD COLUMN IF NOT EXISTS icono VARCHAR(30) NULL AFTER especificaciones;
 ALTER TABLE articulos ADD COLUMN IF NOT EXISTS imagen_base VARCHAR(255) NULL AFTER icono;
+ALTER TABLE articulos ADD COLUMN IF NOT EXISTS imagen_url VARCHAR(500) NULL AFTER imagen_base;
 
 -- Datos de prueba (artículos puramente operativos, sin categoria:
 -- no aparecen en la tienda, solo en el panel de inventario)

@@ -8,11 +8,11 @@ const ESTADOS_VALIDOS = ['disponible', 'reservado', 'agotado', 'en_transito'];
 // tienda (Proyecto 1) — ver GET /?catalogo=1 más abajo. Todos estos
 // campos son opcionales: un artículo puramente operativo (sin
 // categoria) simplemente no aparece ahí, solo en /inventario/.
-const CAMPOS_CATALOGO = ['precio', 'precio_anterior', 'categoria', 'especificaciones', 'icono', 'imagen_base'];
+const CAMPOS_CATALOGO = ['precio', 'precio_anterior', 'categoria', 'especificaciones', 'icono', 'imagen_base', 'imagen_url'];
 
 function validarArticulo(body, { parcial = false } = {}) {
   const errores = [];
-  const { nombre, cantidad, ubicacion, estado, precio, precio_anterior, categoria, especificaciones, icono, imagen_base } = body;
+  const { nombre, cantidad, ubicacion, estado, precio, precio_anterior, categoria, especificaciones, icono, imagen_base, imagen_url } = body;
 
   if (!parcial || nombre !== undefined) {
     if (!nombre || typeof nombre !== 'string' || !nombre.trim()) {
@@ -50,6 +50,12 @@ function validarArticulo(body, { parcial = false } = {}) {
   if (categoria !== undefined && categoria !== null && (typeof categoria !== 'string' || categoria.length > 30)) {
     errores.push('categoria debe ser texto de máximo 30 caracteres');
   }
+  // Un artículo con categoria aparece en la tienda (ver GET ?catalogo=1):
+  // si no tiene precio, la tienda mostraría "₡NaN". Se exige que ambos
+  // vengan juntos en la misma petición para evitar ese estado inválido.
+  if (categoria !== undefined && categoria !== null && (precio === undefined || precio === null)) {
+    errores.push('para mostrar el artículo en la tienda (categoria) se requiere precio');
+  }
   if (especificaciones !== undefined && especificaciones !== null && (typeof especificaciones !== 'string' || especificaciones.length > 150)) {
     errores.push('especificaciones debe ser texto de máximo 150 caracteres');
   }
@@ -58,6 +64,14 @@ function validarArticulo(body, { parcial = false } = {}) {
   }
   if (imagen_base !== undefined && imagen_base !== null && (typeof imagen_base !== 'string' || imagen_base.length > 255)) {
     errores.push('imagen_base debe ser texto de máximo 255 caracteres');
+  }
+
+  if (imagen_url !== undefined && imagen_url !== null && imagen_url !== '') {
+    if (typeof imagen_url !== 'string' || imagen_url.length > 500) {
+      errores.push('imagen_url debe ser texto de máximo 500 caracteres');
+    } else if (!/^https?:\/\/.+/i.test(imagen_url.trim())) {
+      errores.push('imagen_url debe ser un link http:// o https:// válido');
+    }
   }
 
   return errores;

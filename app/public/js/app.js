@@ -41,8 +41,15 @@ async function apiFetch(url, options = {}) {
 
 /* -------------------- Render -------------------- */
 function articuloCard(a) {
+  const thumb = a.imagen_url
+    ? `<div class="articulo-thumb">
+         <img src="${escapeHtml(a.imagen_url)}" alt="${escapeHtml(a.nombre)}" loading="lazy"
+              onerror="this.parentElement.style.display='none'">
+       </div>`
+    : '';
   return `
     <article class="articulo-card" data-id="${a.id}">
+      ${thumb}
       <div class="articulo-top">
         <div>
           <p class="articulo-nombre">${escapeHtml(a.nombre)}</p>
@@ -50,6 +57,7 @@ function articuloCard(a) {
         </div>
         <span class="estado-badge estado-${a.estado}">${ESTADO_LABEL[a.estado] || a.estado}</span>
       </div>
+      ${a.categoria ? `<p class="articulo-tienda"><i class="bi bi-shop"></i> En tienda · ${escapeHtml(a.categoria)}</p>` : ''}
       <p class="articulo-cantidad">${a.cantidad}<small>unidades</small></p>
       <div class="articulo-actions">
         <button class="icon-action edit-btn" data-id="${a.id}"><i class="bi bi-pencil"></i> Editar</button>
@@ -89,6 +97,24 @@ async function cargarArticulos() {
   }
 }
 
+/* -------------------- Previsualización del link de imagen -------------------- */
+function actualizarPreviewImagen() {
+  const url = document.getElementById('imagenUrl').value.trim();
+  const preview = document.getElementById('imgPreview');
+  const img = document.getElementById('imgPreviewImg');
+  const error = document.getElementById('imgPreviewError');
+
+  if (!url) {
+    preview.style.display = 'none';
+    return;
+  }
+
+  preview.style.display = 'flex';
+  img.style.display = '';
+  error.style.display = 'none';
+  img.src = url;
+}
+
 /* -------------------- Formulario: registrar / actualizar -------------------- */
 function resetFormulario() {
   editandoId = null;
@@ -98,6 +124,7 @@ function resetFormulario() {
   document.getElementById('formTitle').textContent = 'Registrar artículo';
   document.getElementById('submitBtn').innerHTML = '<i class="bi bi-plus-circle"></i> Registrar';
   document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('imgPreview').style.display = 'none';
 }
 
 function cargarEnFormulario(articulo) {
@@ -107,6 +134,14 @@ function cargarEnFormulario(articulo) {
   document.getElementById('cantidad').value = articulo.cantidad;
   document.getElementById('ubicacion').value = articulo.ubicacion;
   document.getElementById('estado').value = articulo.estado;
+  document.getElementById('imagenUrl').value = articulo.imagen_url || '';
+  actualizarPreviewImagen();
+
+  document.getElementById('categoria').value = articulo.categoria || '';
+  document.getElementById('precio').value = articulo.precio ?? '';
+  document.getElementById('precioAnterior').value = articulo.precio_anterior ?? '';
+  document.getElementById('icono').value = articulo.icono || '';
+  document.getElementById('especificaciones').value = articulo.especificaciones || '';
 
   document.getElementById('formEyebrow').textContent = `Editando artículo #${articulo.id}`;
   document.getElementById('formTitle').textContent = `Actualizar "${articulo.nombre}"`;
@@ -119,11 +154,31 @@ function cargarEnFormulario(articulo) {
 async function manejarSubmit(e) {
   e.preventDefault();
 
+  const categoriaVal = document.getElementById('categoria').value;
+  const enTienda = categoriaVal !== '';
+  const precioVal = document.getElementById('precio').value;
+
+  if (enTienda && precioVal === '') {
+    showToast('Si el artículo se muestra en la tienda, el precio es obligatorio', true);
+    document.getElementById('precio').focus();
+    return;
+  }
+
   const payload = {
     nombre: document.getElementById('nombre').value,
     cantidad: parseInt(document.getElementById('cantidad').value, 10),
     ubicacion: document.getElementById('ubicacion').value,
     estado: document.getElementById('estado').value,
+    imagen_url: document.getElementById('imagenUrl').value.trim() || null,
+    // Campos de catálogo: si el artículo no se muestra en la tienda se
+    // envían en null explícitamente, así "desmarcar" también lo saca
+    // del catálogo (categoria IS NOT NULL es lo que filtra la tienda).
+    categoria: enTienda ? categoriaVal : null,
+    precio: enTienda ? Number(precioVal) : null,
+    precio_anterior: enTienda && document.getElementById('precioAnterior').value !== ''
+      ? Number(document.getElementById('precioAnterior').value) : null,
+    icono: enTienda ? (document.getElementById('icono').value.trim() || null) : null,
+    especificaciones: enTienda ? (document.getElementById('especificaciones').value.trim() || null) : null,
   };
 
   try {
@@ -179,6 +234,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('articuloForm').addEventListener('submit', manejarSubmit);
   document.getElementById('cancelEditBtn').addEventListener('click', resetFormulario);
+
+  let previewDebounce;
+  document.getElementById('imagenUrl').addEventListener('input', () => {
+    clearTimeout(previewDebounce);
+    previewDebounce = setTimeout(actualizarPreviewImagen, 300);
+  });
+  document.getElementById('imgPreviewImg').addEventListener('error', () => {
+    document.getElementById('imgPreviewImg').style.display = 'none';
+    document.getElementById('imgPreviewError').style.display = 'flex';
+  });
 
   document.getElementById('articulosGrid').addEventListener('click', (e) => {
     const editBtn = e.target.closest('.edit-btn');
