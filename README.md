@@ -6,7 +6,7 @@ Implementación y operación de una solución de inventario para la empresa de l
 
 ## Estructura
 
-- `app/` — Aplicación web (Node.js + Express) de gestión de inventario.
+- `app/` — Aplicación web (Node.js + Express) de gestión de inventario. Ver [app/README.md](app/README.md) para la documentación detallada de la API REST y endpoints.
 - `db/` — Esquema y scripts de la base de datos (MySQL/MariaDB).
 - `backup/` — Scripts de respaldo automatizado hacia Azure Blob Storage y procedimiento de restauración.
 - `docs/` — Evidencias (capturas de restauración, app en móvil, etc.). La documentación técnica formal (arquitectura, justificaciones) vive fuera de este repo.
